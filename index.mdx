@@ -1,4 +1,109 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Stock Games Integration API Documentation"
+---
+
+---
+
+## Overview
+
+Stock provides a comprehensive game integration API that allows third-party vendors to seamlessly integrate our games into their websites. This documentation outlines the simple integration process for accessing and displaying our games through iframe embedding.
+
+## Getting Started
+
+To integrate Stock games into your platform, you'll need:
+
+- A base URL provided by Stock
+- An authorization token for API access
+
+## Authentication
+
+All API requests must include an authorization token in the request headers. This token will be manually provided by Stock during the onboarding process.
+
+```
+Headers:
+api-key: YOUR_AUTHORIZATION_TOKEN
+```
+
+## Game Integration Flow
+
+### Step 1: Request Game URL
+
+To access any game, make a POST request to the external user endpoint:
+
+**Endpoint:** `{BASE_URL}/api/external-user/`
+
+**Method:** POST
+
+**Headers:**
+
+```
+api-key: YOUR_AUTHORIZATION_TOKEN
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```
+const payload = {
+  gameName,    // Game identifier (see available games below)
+  name,        // Player's display name
+  userId,      // Unique user identifier from your system
+};
+```
+
+### Step 2: Receive Game URL
+
+**Response:**
+
+```
+{
+  "url": "https://game-url-here.com"
+}
+```
+
+### Step 3: Embed Game
+
+Use the returned URL to embed the game in your frontend as an iframe:
+
+```
+<iframe 
+  src="RECEIVED_GAME_URL" 
+  width="100%" 
+  height="600px"
+  frameborder="0">
+</iframe>
+```
+
+## Available Games
+
+Stock offers the following games for integration:
+
+| Game Name        | API Identifier     | Description                          |
+| :--------------- | :----------------- | :----------------------------------- |
+| Derby            | `derby`            | Horse racing simulation game         |
+| Stock Slots      | `stock_slots`      | Stock market themed slot machine     |
+| Stock Jackpot    | `stock_jackpot`    | Progressive jackpot with stock theme |
+| Seven Up Down    | `seven_up_down`    | Prediction-based card game           |
+| Head Tail        | `head_tail`        | Classic coin flip game               |
+| Wheel of Fortune | `wheel_of_fortune` | Spinning wheel luck game             |
+| Aviator          | `aviator`          | Flight-based multiplier game         |
+| Dice             | `dice`             | Traditional dice rolling game        |
+
+## Integration Requirements
+
+- Ensure your website can display iframes
+- Implement proper error handling for API requests
+- Store and securely manage your authorization token
+- Validate user data before sending requests
+
+## Security Considerations
+
+- Keep your authorization token secure and never expose it in client-side code
+- Implement proper user authentication on your platform
+- Ensure HTTPS is used for all API communications
+
+## Support
+
+For technical support, integration assistance, or to obtain your base URL and authorization token, please contact the Stock Games integration team.
+
 ---
