@@ -1,5 +1,325 @@
 ---
-title: 'New file'
-description: 'Description of your new file.'
+title: "W"
+description: "Description of your new file."
 ---
 
+---
+
+## title: "Partner API Requirements"
+description: "API endpoints that partners must implement for Stock Games integration"
+
+## Overview
+
+This guide outlines the API requirements that partners must implement to integrate with Stock Games. Partners need to provide a service-based API that Stock Games will use to manage user wallet operations during gameplay.
+
+<Info>
+  Partners must provide their **Base URL** and **API Key** to Stock Games during the onboarding process for secure communication.
+</Info>
+
+## Authentication
+
+All requests from Stock Games include Bearer token authentication:
+
+<CodeGroup>
+
+```bash Headers
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+</CodeGroup>
+
+<Warning>
+  Ensure your API validates the Bearer token on every request for security.
+</Warning>
+
+## Required Endpoints
+
+Your API service must implement these three endpoints:
+
+### Get Wallet Balance
+
+<Info>
+  **Purpose:** Retrieve the current wallet balance for a user
+</Info>
+
+<CodeGroup>
+
+```bash Request
+GET {BASE_URL}/wallet/balance?userId={USER_ID}&gameName={GAME_NAME}
+Authorization: Bearer YOUR_API_KEY
+```
+
+
+```bash Example
+GET https://your-api.com/wallet/balance?userId=user_12345&gameName=aviator
+Authorization: Bearer your_api_key_here
+```
+
+</CodeGroup>
+
+**Query Parameters**
+
+<ParamField query="userId" type="string" required>
+  The external user ID from your system
+</ParamField>
+
+<ParamField query="gameName" type="string" required>
+  The name of the game being accessed
+</ParamField>
+
+**Response**
+
+<ResponseField name="data" type="object" required>
+  <Expandable title="data">
+    <ResponseField name="balance" type="number" required>
+      Current wallet balance
+    </ResponseField>
+    <ResponseField name="userId" type="string" required>
+      User identifier
+    </ResponseField>
+    <ResponseField name="gameName" type="string" required>
+      Game identifier
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+
+```json Response Example
+{
+    "balance": 1250.50,
+    "userId": "user_12345",
+    "gameName": "aviator"
+}
+```
+
+</CodeGroup>
+
+### Deduct Balance
+
+<Info>
+  **Purpose:** Deduct amount from user's wallet when placing bets
+</Info>
+
+<CodeGroup>
+
+```bash Request
+POST {BASE_URL}/wallet/deduction
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+
+```json Request Body
+{
+  "userId": "user_12345",
+  "amount": 25.00,
+  "roundId": "round_789",
+  "gameName": "aviator",
+  "betId": "bet_456",
+  "transactionId": "txn_123",
+  "transactionType": "debit"
+}
+```
+
+</CodeGroup>
+
+**Body Parameters**
+
+<ParamField body="userId" type="string" required>
+  External user identifier
+</ParamField>
+
+<ParamField body="amount" type="number" required>
+  Amount to deduct from wallet
+</ParamField>
+
+<ParamField body="roundId" type="string" required>
+  Game round identifier
+</ParamField>
+
+<ParamField body="gameName" type="string" required>
+  Game identifier
+</ParamField>
+
+<ParamField body="betId" type="string" required>
+  Unique bet identifier
+</ParamField>
+
+<ParamField body="transactionId" type="string" required>
+  Stock Games transaction ID
+</ParamField>
+
+<ParamField body="transactionType" type="string" required>
+  Transaction type (typically "debit")
+</ParamField>
+
+**Response**
+
+<ResponseField name="success" type="boolean" required>
+  Transaction success status
+</ResponseField>
+
+<ResponseField name="transactionId" type="string" required>
+  Your internal transaction ID
+</ResponseField>
+
+<ResponseField name="remainingBalance" type="number" required>
+  User's remaining wallet balance
+</ResponseField>
+
+<CodeGroup>
+
+```json Response Example
+{
+  "success": true,
+}
+```
+
+</CodeGroup>
+
+### Deposit Balance
+
+<Info>
+  **Purpose:** Add winnings to user's wallet
+</Info>
+
+<CodeGroup>
+
+```bash Request
+POST {BASE_URL}/wallet/deposit
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+
+```json Request Body
+{
+  "userId": "user_12345",
+  "amount": 50.00,
+  "roundId": "round_789",
+  "gameName": "aviator",
+  "transactionId": "txn_124",
+  "transactionType": "credit"
+}
+```
+
+</CodeGroup>
+
+**Body Parameters**
+
+<ParamField body="userId" type="string" required>
+  External user identifier
+</ParamField>
+
+<ParamField body="amount" type="number" required>
+  Amount to deposit to wallet
+</ParamField>
+
+<ParamField body="roundId" type="string" required>
+  Game round identifier
+</ParamField>
+
+<ParamField body="gameName" type="string" required>
+  Game identifier
+</ParamField>
+
+<ParamField body="transactionId" type="string" required>
+  Stock Games transaction ID
+</ParamField>
+
+<ParamField body="transactionType" type="string" required>
+  Transaction type (typically "credit")
+</ParamField>
+
+**Response**
+
+<ResponseField name="success" type="boolean" required>
+  Transaction success status
+</ResponseField>
+
+<CodeGroup>
+
+```json Response Example
+{
+  "success": true,
+}
+```
+
+</CodeGroup>
+
+## Error Handling
+
+Your API should return appropriate HTTP status codes:
+
+<ResponseExample>
+
+```json Success Response (200)
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+
+```json Error Response (400/422/500)
+{
+  "success": false,
+  "error": "Insufficient funds",
+  "code": "INSUFFICIENT_BALANCE"
+}
+```
+
+</ResponseExample>
+
+**HTTP Status Codes**
+
+- `200` - Success
+- `400` - Bad Request (invalid parameters)
+- `401` - Unauthorized (invalid API key)
+- `404` - Not Found (user not found)
+- `422` - Unprocessable Entity (insufficient funds, etc.)
+- `500` - Internal Server Error
+
+## Integration Flow
+
+<Steps>
+  <Step title="Game Access">
+    User requests to play a game through your platform
+  </Step>
+  <Step title="Balance Check">
+    Stock Games calls your `/wallet/balance` endpoint
+  </Step>
+  <Step title="Bet Placement">
+    When user places bet, Stock Games calls `/wallet/deduction`
+  </Step>
+  <Step title="Game Result">
+    If user wins, Stock Games calls `/wallet/deposit`
+  </Step>
+  <Step title="Balance Update">
+    User's wallet reflects the latest balance
+  </Step>
+</Steps>
+
+## Security Requirements
+
+<CardGroup cols={2}>
+  <Card title="HTTPS Only" icon="lock">
+    All API endpoints must use HTTPS encryption
+  </Card>
+  <Card title="API Key Validation" icon="key">
+    Validate the Bearer token on every request
+  </Card>
+  <Card title="Rate Limiting" icon="gauge-high">
+    Implement appropriate rate limiting to prevent abuse
+  </Card>
+  <Card title="Request Validation" icon="shield-check">
+    Validate all incoming request parameters
+  </Card>
+</CardGroup>
+
+
+<Tip>
+  For technical questions about implementing these API requirements or during the integration process, please contact the Stock Games integration team.
+</Tip>

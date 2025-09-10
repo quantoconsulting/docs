@@ -1,8 +1,11 @@
 ---
-title: "Stock Games Integration API Documentation"
+title: "API Documentation"
+description: "Integrate Stock games into your platform with our comprehensive API"
 ---
 
----
+<Info>
+  For partner API requirements and webhook implementations, visit the [Web Hooks](/web-hooks/) page.
+</Info>
 
 ## Overview
 
@@ -19,10 +22,13 @@ To integrate Stock games into your platform, you'll need:
 
 All API requests must include an authorization token in the request headers. This token will be manually provided by Stock during the onboarding process.
 
-```
-Headers:
+<CodeGroup>
+
+```bash Headers
 api-key: YOUR_AUTHORIZATION_TOKEN
 ```
+
+</CodeGroup>
 
 ## Game Integration Flow
 
@@ -30,42 +36,58 @@ api-key: YOUR_AUTHORIZATION_TOKEN
 
 To access any game, make a POST request to the external user endpoint:
 
-**Endpoint:** `{BASE_URL}/api/external-user/`
+<CodeGroup>
 
-**Method:** POST
-
-**Headers:**
-
-```
+```bash Request
+POST {BASE_URL}/api/external-user/
 api-key: YOUR_AUTHORIZATION_TOKEN
 Content-Type: application/json
 ```
 
-**Request Body:**
 
+```json Request Body
+{
+  "gameName": "aviator",    // Game identifier (see available games below)
+  "name": "John Doe",       // Player's display name  
+  "userId": "user_12345"    // Unique user identifier from your system
+}
 ```
-const payload = {
-  gameName,    // Game identifier (see available games below)
-  name,        // Player's display name
-  userId,      // Unique user identifier from your system
-};
-```
+
+</CodeGroup>
+
+**Body Parameters**
+
+<ParamField body="gameName" type="string" required>
+  Game identifier from the available games list
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Player's display name
+</ParamField>
+
+<ParamField body="userId" type="string" required>
+  Unique user identifier from your system
+</ParamField>
 
 ### Step 2: Receive Game URL
 
-**Response:**
+<CodeGroup>
 
-```
+```json Response
 {
   "url": "https://game-url-here.com"
 }
 ```
 
+</CodeGroup>
+
 ### Step 3: Embed Game
 
 Use the returned URL to embed the game in your frontend as an iframe:
 
-```
+<CodeGroup>
+
+```html HTML Implementation
 <iframe 
   src="RECEIVED_GAME_URL" 
   width="100%" 
@@ -73,6 +95,47 @@ Use the returned URL to embed the game in your frontend as an iframe:
   frameborder="0">
 </iframe>
 ```
+
+
+```javascript JavaScript Example
+// Example integration code
+async function loadStockGame(gameName, playerName, playerId) {
+  try {
+    const response = await fetch('{BASE_URL}/api/external-user/', {
+      method: 'POST',
+      headers: {
+        'api-key': 'YOUR_AUTHORIZATION_TOKEN',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        gameName: gameName,
+        name: playerName,
+        userId: playerId
+      })
+    });
+    
+    const data = await response.json();
+    
+    // Embed game in iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = data.url;
+    iframe.width = '100%';
+    iframe.height = '600px';
+    iframe.frameBorder = '0';
+    
+    // Add iframe to your game container
+    document.getElementById('game-container').appendChild(iframe);
+    
+  } catch (error) {
+    console.error('Error loading Stock game:', error);
+  }
+}
+
+// Usage example
+loadStockGame('aviator', 'John Doe', 'user_12345');
+```
+
+</CodeGroup>
 
 ## Available Games
 
@@ -91,19 +154,38 @@ Stock offers the following games for integration:
 
 ## Integration Requirements
 
-- Ensure your website can display iframes
-- Implement proper error handling for API requests
-- Store and securely manage your authorization token
-- Validate user data before sending requests
+<CardGroup cols={2}>
+  <Card title="iframe Support" icon="window-maximize">
+    Ensure your website can display iframes
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation">
+    Implement proper error handling for API requests
+  </Card>
+  <Card title="Token Management" icon="key">
+    Store and securely manage your authorization token
+  </Card>
+  <Card title="Data Validation" icon="shield-check">
+    Validate user data before sending requests
+  </Card>
+</CardGroup>
 
 ## Security Considerations
 
-- Keep your authorization token secure and never expose it in client-side code
-- Implement proper user authentication on your platform
-- Ensure HTTPS is used for all API communications
+<Warning>
+  Keep your authorization token secure and never expose it in client-side code
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="User Authentication" icon="user-shield">
+    Implement proper user authentication on your platform
+  </Card>
+  <Card title="HTTPS Required" icon="lock">
+    Ensure HTTPS is used for all API communications
+  </Card>
+</CardGroup>
 
 ## Support
 
-For technical support, integration assistance, or to obtain your base URL and authorization token, please contact the Stock Games integration team.
-
----
+<Tip>
+  For technical support, integration assistance, or to obtain your base URL and authorization token, please contact the Stock Games integration team.
+</Tip>
